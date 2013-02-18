@@ -8,8 +8,9 @@ class Client:
 		self.loop()
 
 	def loop(self):
-		while self.running:
-			self.ui.check_input()
+		#while self.running:
+		#	self.ui.check_input()
+		pass
 
 
 cli = Client()

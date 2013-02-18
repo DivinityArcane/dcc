@@ -27,5 +27,5 @@ class interface:
 	def check_input(self):
 		pass
 		
-	def close(self):
+	def close(self, button):
 		raise urwid.ExitMainLoop()
