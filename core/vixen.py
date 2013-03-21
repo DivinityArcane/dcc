@@ -175,7 +175,6 @@ class bot:
         self.send('join {0}'.format(ns))
     
     def say(self, ns, message):
-        self.log(self.deform_ns(ns), "sending message...")
         self.send('send {0}\n\nmsg main\n\n{1}'.format(self.format_ns(ns), message))
     
     def send(self, data):
@@ -205,6 +204,7 @@ class bot:
         self.log(ns, self.conmsg['start1'].format(self.m_name, self.m_version, self.m_author))
         self.log(ns, self.conmsg['start2'].format(str(self.debug)))
         self.log(ns, self.conmsg['start3'].format(self.username, self.auth))
+        self.ext.activate_extensions()
         self.connect()
         if self.connected:
         ### connected! ###
@@ -446,11 +446,11 @@ class bot:
             self.joining = False
             ns = args[0]
             r  = args[1]
-            
+            self.active_ns = ns
             self.log('SERVER', self.conmsg['onjoin'].format(self.deform_ns(ns), r))
             self.channel[ns] = {'topic': {}, 'title': {}, 'privclasses': {}, 'members': {}}
             data = {'ns': ns, 'r': r}
-            self.active_ns = ns
+            
         elif typ == 'joinfailed':
             ns = args[0]
             r  = args[1]

@@ -34,7 +34,12 @@ nosetests.xml
 .project
 .pydevproject
 
-
+# not sure if i have to specify folder or not,
+# So ill just do this in case?
+storage/*
+# moving on...
 user.txt
 auth.txt
-
+autojoin.txt
+debug.log
+debug.txt
