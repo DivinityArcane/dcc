@@ -3,7 +3,7 @@ import socket, time, os, sys, traceback, re, select
 import extensions
 
 class bot:
-    def __init__(self, ui, username, authtoken, debugfile='debug.log', debug=False, agent='dAmn.vixen', server='chat.deviantart.com', port=3900, encoding='latin-1', clientver='0.3', client='dAmnClient', autojoin=['#Botdom', '#DeviousDevelopment']):
+    def __init__(self, ui, username, authtoken, debugfile='debug.log', debug=False, agent='dAmn.vixen', server='chat.deviantart.com', port=3900, encoding='latin-1', clientver='0.3', client='dAmnClient', autojoin=['#Botdom']):
         self.m_name        = 'vixen'
         self.m_version     = 5.0
         self.m_author      = 'OrrinFox'
@@ -175,8 +175,8 @@ class bot:
         self.send('join {0}'.format(ns))
     
     def say(self, ns, message):
-        self.log(ns, "sending message...")
-        self.send('send chat:{0}\n\nmsg main\n\n{1}'.format(self.format_ns(ns), message))
+        self.log(self.deform_ns(ns), "sending message...")
+        self.send('send {0}\n\nmsg main\n\n{1}'.format(self.format_ns(ns), message))
     
     def send(self, data):
         try:
