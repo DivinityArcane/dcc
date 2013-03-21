@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import socket, time, os, sys, traceback, re, select
+import extensions
 
 class bot:
     def __init__(self, ui, username, authtoken, debugfile='debug.log', debug=False, agent='dAmn.vixen', server='chat.deviantart.com', port=3900, encoding='latin-1', clientver='0.3', client='dAmnClient', autojoin=['#Botdom', '#DeviousDevelopment']):
@@ -7,12 +8,12 @@ class bot:
         self.m_version     = 5.0
         self.m_author      = 'OrrinFox'
         
-       
+        self.active_ns     = 'System'
         self.username      = username
         self.auth          = authtoken
         self.autojoin      = autojoin
-	self.UI            = ui
-        
+        self.UI            = ui
+        self.ext           = extensions.main(self)
         
         self.server        = server
         self.port          = port
@@ -124,15 +125,20 @@ class bot:
         ]
         
         
-    def log(self, ns, message):
+    def log(self, ns, message, shown=True):
         ts = time.strftime('[%I:%M:%S%p]')
         try:   
             ns = '['+ns+']'
-            msg = ts+ns+message
+            if shown:
+                # Added boolean "shown" for printing regular text in the console.
+                msg = ts+ns+message
+            else:
+                msg=message
         
             self.UI.add_line(msg)
             
         except:
+            
             msg = ts+'[ERROR]'+self.conmsg['error'].format(traceback.format_exc())
             self.UI.add_line(self.conmsg['error'].format(msg))
         
@@ -165,7 +171,12 @@ class bot:
         self.send('disconnect')
     
     def join(self, ns):
+        self.active_ns = ns
         self.send('join {0}'.format(ns))
+    
+    def say(self, ns, message):
+        self.log(ns, "sending message...")
+        self.send('send chat:{0}\n\nmsg main\n\n{1}'.format(self.format_ns(ns), message))
     
     def send(self, data):
         try:
@@ -435,9 +446,11 @@ class bot:
             self.joining = False
             ns = args[0]
             r  = args[1]
+            
             self.log('SERVER', self.conmsg['onjoin'].format(self.deform_ns(ns), r))
             self.channel[ns] = {'topic': {}, 'title': {}, 'privclasses': {}, 'members': {}}
             data = {'ns': ns, 'r': r}
+            self.active_ns = ns
         elif typ == 'joinfailed':
             ns = args[0]
             r  = args[1]
@@ -564,3 +577,13 @@ class bot:
             _data['type'] = 'members'
             if self.debug:
                 self.log('SERVER', self.conmsg['grabmember'].format(self.deform_ns(ns)))
+        elif typ == 'conmsg':
+            # This is where console input should be handled.
+            message = args[0]
+            ns      = self.active_ns
+            if self.debug:
+                self.log('DEBUG', 'USER_INPUT: '+message.strip())
+            # Now to make a command system / extension loader.
+            data = {'message': message, 'ns': ns}
+            self.ext.command(data)
+            

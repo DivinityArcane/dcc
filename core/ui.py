@@ -12,7 +12,7 @@ class Interface:
 
 	def __init__(self):
 		self.name     = 'dcc'
-		self.version  = '0.01 Beta'
+		self.version  = '0.02 Beta'
 		self.title    = ' > dAmn Curses Client - dcc v' + self.version
 		self.actbar   = ' > [un] in [ns] - ([c] user[s])'
 		self.lines    = []
@@ -45,8 +45,12 @@ class Interface:
 				if key == curses.KEY_BACKSPACE or key == 'KEY_BACKSPACE':
 					self.buffer = self.buffer[:-1]
 				elif key == '\n' or key == '\r':
-					self.add_line(self.buffer)
-					self.buffer = ''
+					# Since the bot will handle this, no longer add it to the screen ~ OrrinFox
+                                        # self.add_line(self.buffer)
+					# This is where we send input from the user into the bot's event system
+                                        # Further handling will be done by the bot.
+                                        self.core.onevent('conmsg', [self.buffer])
+                                        self.buffer = ''
 				elif key == chr(033): 
 					break
 				else:
@@ -70,8 +74,8 @@ class Interface:
 		# [c]  = user count
 		# [d]  = s if user count != 1, else empty
 
-		actbar = actbar.replace('[un]', 'TestUser')
-		actbar = actbar.replace('[ns]', '#Botdom')
+		actbar = actbar.replace('[un]', self.core.username)
+		actbar = actbar.replace('[ns]', self.core.deform_ns(self.core.active_ns))
 		actbar = actbar.replace('[c]',  '0')
 		actbar = actbar.replace('[s]',  's') 
 	
