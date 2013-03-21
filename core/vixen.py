@@ -9,6 +9,8 @@ class bot:
         self.m_author      = 'OrrinFox'
         
         self.active_ns     = 'System'
+        self.active_users  = 0
+        
         self.username      = username
         self.auth          = authtoken
         self.autojoin      = autojoin
@@ -575,8 +577,10 @@ class bot:
                                                             'gpc': gpc}
                     _data[name] = {'pc': pc, 'usericon': usericon, 'symbol': symbol, 'realname': realname, 'gpc': gpc}
             _data['type'] = 'members'
+            self.active_users = len(self.channel[ns]['members'].keys())
             if self.debug:
                 self.log('SERVER', self.conmsg['grabmember'].format(self.deform_ns(ns)))
+            
         elif typ == 'conmsg':
             # This is where console input should be handled.
             message = args[0]

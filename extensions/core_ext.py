@@ -23,6 +23,7 @@ class extension(base):
                 indexof = chatlist.index(channel)
                 realns  = list(system.channel.keys())[indexof]
                 system.client.active_ns = realns
+                system.client.active_users = len(system.channel[realns]['members'].keys())
             else:
                 system.client.log('ERROR', 'Not joined in {0}'.format(system.client.deform_ns(channel)))
         else:

@@ -76,7 +76,7 @@ class Interface:
 
 		actbar = actbar.replace('[un]', self.core.username)
 		actbar = actbar.replace('[ns]', self.core.deform_ns(self.core.active_ns))
-		actbar = actbar.replace('[c]',  '0')
+		actbar = actbar.replace('[c]',  str(self.core.active_users))
 		actbar = actbar.replace('[s]',  's') 
 	
 		
