@@ -13,6 +13,7 @@ class extension(base):
         system.add_command('chat', self.cmd_chat, 'change active channel')
         system.add_command('join', self.cmd_join, 'join a room.')
         system.add_command('part', self.cmd_part, 'part a room.')
+        system.add_command('clear', self.cmd_clear, 'clear the screen')
         
     # Example...
     def cmd_test(self, ns, args, system):
@@ -51,6 +52,11 @@ class extension(base):
                 return system.client.log('ERROR', 'Cannot part system namespace.')
             else:
                 system.client.part(system.client.format_ns(system.client.active_ns))
+                
+    def cmd_clear(self, ns, args, system):
+        # Not sure if theres a better way to do this but... :P
+        system.client.log('SYSTEM', ('\n'*100)+'Screen cleared.')
+        
                 
         
         

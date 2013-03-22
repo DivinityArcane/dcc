@@ -539,7 +539,7 @@ class bot:
             if not reason:
                 self.log(self.deform_ns(ns), self.conmsg['recvpart'].format(user))
             else:
-                self.log('SERVER', self.conmsg['recvpart1'].format(user, reason))
+                self.log(self.deform_ns(ns), self.conmsg['recvpart1'].format(user, reason))
         elif typ == 'usrkicked':
             ns      = args[0]
             user    = args[1]

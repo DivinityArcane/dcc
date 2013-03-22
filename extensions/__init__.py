@@ -46,24 +46,17 @@ class main:
             
             if command in self.commands:
                 try:
-                    if ''.join(args).endswith('--?') and message.strip() == self.trigger+command+' --?':
+                    #x = thread(None, self.commands[command], args=(ns, args, self)).start()
+                    x = self.commands[command](ns, args, self)
+                    if x == False:
                         if command in self.help.keys():
-                            self.client.log('', self.help[command].format(trig=self.trigger), shown=False)
+                            self.client.log('', self.help[command].format(trig=self.trigger), False)
                         else:
-                            self.client.log('HELP', 'No help topic for {0}'.format(command))
-                    else:
-                        
-                        #x = thread(None, self.commands[command], args=(ns, args, self)).start()
-                        x = self.commands[command](ns, args, self)
-                        if x == False:
-                            if command in self.help.keys():
-                                self.client.log('', self.help[command].format(trig=self.trigger), shown=False)
-                            else:
-                                self.client.log('HELP', 'No help topic for {0}'.format(command))
+                            self.client.log('HELP', 'No help topic for {0}'.format(command), False)
                 except:
                     self.onerror(traceback.format_exc())
             else:
-                self.client.log('', 'Command {0} doesn\'t exist'.format(command), shown=False)
+                self.client.log('', 'Command {0} doesn\'t exist'.format(command), False)
         else:
             if len(message) < 1: return self.onerror('Nothing to send to {0}...'.format(self.client.deform_ns(ns)))
             
