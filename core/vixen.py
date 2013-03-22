@@ -15,7 +15,7 @@ class bot:
         # then when we grab the members for the buffer_ns
         # set it to active_ns, ( reason: if we join before members gotten it shows
         # the members to the previous ns before the one we joined.. i know its hacky
-        # But i wont really see a better way )
+        # But i dont really see a better way )
         
         self.username      = username
         self.auth          = authtoken
