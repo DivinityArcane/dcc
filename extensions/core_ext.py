@@ -6,9 +6,13 @@ class extension(base):
         self.version = 1.0
         self.author = 'OrrinFox'
         self.descrip = 'core commands for the client.'
-        system.add_command('helloworld', self.cmd_test, 'Hello world command')
-        system.add_command('chat', self.cmd_chat, 'change active channel')
         
+        # This is an example comman, used for testing, not needed anymore.
+        #system.add_command('helloworld', self.cmd_test, 'Hello world command')
+        
+        system.add_command('chat', self.cmd_chat, 'change active channel')
+        system.add_command('join', self.cmd_join, 'join a room.')
+        system.add_command('part', self.cmd_part, 'part a room.')
         
     # Example...
     def cmd_test(self, ns, args, system):
@@ -29,6 +33,24 @@ class extension(base):
         else:
             return False
             
+    def cmd_join(self, ns, args, system):
+        # I had to modify the system for joining rooms
+        # just so this looks normal... herp
+        if len(args) > 1:
+            channel = system.client.format_ns(args[1])
+            system.client.join(channel)
+        else:
+            return False
+            
+    def cmd_part(self, ns, args, system):
+        if len(args) > 1:
+            channel = system.client.format_ns(args[1])
+            system.client.part(channel)
+        else:
+            if system.client.active_ns == 'System':
+                return system.client.log('ERROR', 'Cannot part system namespace.')
+            else:
+                system.client.part(system.client.format_ns(system.client.active_ns))
                 
         
         

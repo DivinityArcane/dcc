@@ -10,6 +10,12 @@ class bot:
         
         self.active_ns     = 'System'
         self.active_users  = 0
+        self.buffer_ns     = ''
+        # Buffer_ns is what we claim on join
+        # then when we grab the members for the buffer_ns
+        # set it to active_ns, ( reason: if we join before members gotten it shows
+        # the members to the previous ns before the one we joined.. i know its hacky
+        # But i wont really see a better way )
         
         self.username      = username
         self.auth          = authtoken
@@ -155,6 +161,7 @@ class bot:
             else:
                 self.connected = False
         self.log('SYSTEM', self.conmsg['shutdown'].format(reason))
+        
       
     def connect(self):
         self.log('SERVER', self.conmsg['connecting'].format(self.server, str(self.port)))
@@ -172,12 +179,24 @@ class bot:
         self.connected = False
         self.send('disconnect')
     
+    #
+    # Server stuff.
+    #
+    
     def join(self, ns):
-        self.active_ns = ns
+        self.buffer_ns = ns
         self.send('join {0}'.format(ns))
     
     def say(self, ns, message):
         self.send('send {0}\n\nmsg main\n\n{1}'.format(self.format_ns(ns), message))
+    
+    def part(self, ns):
+        self.send('part {0}'.format(ns))
+    
+    #
+    # End of server stuff.
+    #
+    
     
     def send(self, data):
         try:
@@ -448,7 +467,8 @@ class bot:
             self.joining = False
             ns = args[0]
             r  = args[1]
-            self.active_ns = ns
+            self.buffer_ns = ns
+            # see above for information on buffer_ns
             self.log('SERVER', self.conmsg['onjoin'].format(self.deform_ns(ns), r))
             self.channel[ns] = {'topic': {}, 'title': {}, 'privclasses': {}, 'members': {}}
             data = {'ns': ns, 'r': r}
@@ -460,9 +480,14 @@ class bot:
         elif typ == 'parted':
             ns = args[0]
             r = args[1]
-            self.log('SERVER', self.conmsg['parted'].format(self.deform_ns(ns), reason))
+            
             del self.channel[ns]
-            data = {'ns': ns, 'r': reason}
+            if self.active_ns == ns:
+                self.change_ns()
+                
+            data = {'ns': ns, 'r': r}
+            self.log('SERVER', self.conmsg['parted'].format(self.deform_ns(ns), r))
+            
         elif typ == 'partfailed':
             ns = args[0]
             r  = args[1]
@@ -474,10 +499,11 @@ class bot:
             ns = args[0]
             reason = args[1]
             by = args[2]
-            self.log(ns=self.deform_ns(ns), message=self.conmsg['kicked'].format(by, '['+reason+']' if len(reason) > 0 else ''))
             del self.channel[ns]
-            if len(self.channel) < 1: self.quit('No joined channels!')
+            if self.active_ns == ns:
+                self.change_ns()
             data = {'ns': ns, 'r': reason, 'by': by }
+            self.log(ns=self.deform_ns(ns), message=self.conmsg['kicked'].format(by, '['+reason+']' if len(reason) > 0 else ''))
         elif typ == 'ping':
             self.send('pong')
             if self.debug:
@@ -497,6 +523,9 @@ class bot:
             user = args[1]
             data = args[2]
             self.channel[ns]['members'][user] = data
+            if ns == self.active_ns:
+                # update information on active ns
+                self.active_users = len(self.channel[self.active_ns]['members'].keys())
             self.log(self.deform_ns(ns), self.conmsg['usrjoin'].format(user))
         elif typ == 'usrparted':
             ns      = args[0]
@@ -505,6 +534,8 @@ class bot:
             data    = args[3]
             if user in self.channel[ns]['members'].keys():
                 del self.channel[ns]['members'][user]
+            if ns == self.active_ns:
+                self.active_users = len(self.channel[self.active_ns]['members'].keys())
             if not reason:
                 self.log(self.deform_ns(ns), self.conmsg['recvpart'].format(user))
             else:
@@ -516,6 +547,8 @@ class bot:
             by      = args[2]['by']
             if user in self.channel[ns]['members'].keys():
                 del self.channel[ns]['members'][user]
+            if ns == self.active_ns:
+                self.active_users = len(self.channel[self.active_ns]['members'].keys())
             self.log(self.deform_ns(ns), self.conmsg['usrkicked'].format(user, by, '['+reason+']' if len(reason) > 0 else ''))
             data = {'ns': ns, 'user': user, 'r': reason, 'by': by}
         elif typ == 'adminrename':
@@ -577,9 +610,13 @@ class bot:
                                                             'gpc': gpc}
                     _data[name] = {'pc': pc, 'usericon': usericon, 'symbol': symbol, 'realname': realname, 'gpc': gpc}
             _data['type'] = 'members'
-            self.active_users = len(self.channel[ns]['members'].keys())
-            if self.debug:
-                self.log('SERVER', self.conmsg['grabmember'].format(self.deform_ns(ns)))
+            if ns == self.buffer_ns:
+                #again, see above for information about this
+                # theres a method to my madness. :P
+                self.active_ns    = self.buffer_ns
+                self.active_users = len(self.channel[ns]['members'].keys())
+            # Well make it log this so it will post how many users are in the current room :P
+            self.log('SERVER', self.conmsg['grabmember'].format(self.deform_ns(ns)))
             
         elif typ == 'conmsg':
             # This is where console input should be handled.
@@ -591,3 +628,10 @@ class bot:
             data = {'message': message, 'ns': ns}
             self.ext.command(data)
             
+    def change_ns(self):
+        if len(self.channel) < 1: 
+            self.active_ns = 'System'
+            self.active_users = 0
+            return True
+        self.active_ns = list(self.channel.keys())[0]
+        self.active_users = len(self.channel[self.active_ns]['members'].keys())
