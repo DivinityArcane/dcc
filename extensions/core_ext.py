@@ -12,6 +12,9 @@ class extension(base):
                                 '   Usage:\n'+
                                 '       {trig}chat [ #channel ]\n\n'+
                                 '   [ #channel ] = channel to change activity in.\n**********',
+                      'me':     '**********\nMe - Perform a dAmn action.\n'+
+                                '   Usage:\n'+
+                                '       {trig}me message\n\n**********',
                       'clear':  '**********\nClear - Clear the screen.\n'+
                                 '   Usage:\n'+
                                 '       {trig}clear\n\n**********',
@@ -36,6 +39,7 @@ class extension(base):
         #system.add_command('helloworld', self.cmd_test, 'Hello world command')
         
         system.add_command('chat', self.cmd_chat, self.man['chat'])
+        system.add_command('me', self.cmd_me, self.man['me'])
         system.add_command('join', self.cmd_join, self.man['join'])
         system.add_command('part', self.cmd_part, self.man['part'])
         system.add_command('clear', self.cmd_clear, self.man['clear'])
@@ -48,17 +52,31 @@ class extension(base):
     def cmd_chat(self, ns, args, system):
         chatlist = [system.client.deform_ns(x).lower() for x in system.channel.keys()]
         if len(args) > 1:
-            channel = system.client.deform_ns(args[1].lower())
-            if channel in chatlist:
-            # get index of lowered' list
-                indexof = chatlist.index(channel)
-                realns  = list(system.channel.keys())[indexof]
-                system.client.active_ns = realns
-                system.client.active_users = len(system.channel[realns]['members'].keys())
-            else:
-                system.client.log('ERROR', 'Not joined in {0}'.format(system.client.deform_ns(channel)))
+            if args[1].lower() == 'system':
+                system.client.active_ns    = 'System'
+                system.client.active_users = 0
+                system.client.UI.refresh()
+
+            else:                
+                channel = system.client.deform_ns(args[1].lower())
+
+                if channel in chatlist:
+                # get index of lowered' list
+                    indexof = chatlist.index(channel)
+                    realns  = list(system.channel.keys())[indexof]
+                    system.client.active_ns = realns
+                    system.client.active_users = len(system.channel[realns]['members'].keys())
+                    system.client.UI.refresh()
+                else:
+                    system.client.log('ERROR', 'Not joined in {0}'.format(system.client.deform_ns(channel)))
+
         else:
             return False
+
+    def cmd_me(self, ns, args, system):
+        if len(args) > 1:
+            msg = ' '.join(args[1:])
+            system.client.act(ns, msg)
             
     def cmd_join(self, ns, args, system):
         # I had to modify the system for joining rooms

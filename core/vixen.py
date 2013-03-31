@@ -71,7 +71,7 @@ class bot:
                         'kicked': 'Kicked by {0} {1}',
                         'pong': 'Received ping... sent Pong!',
                         'msgrecv': '[{0}] {1}',
-                        'actionrecv': '*{0} {1}',
+                        'actionrecv': '* {0} {1}',
                         'usrjoin': '{0} has joined.',
                         'recvpart': '{0} has left.',
                         'recvpart1': '{0} has left. [{1}]',
@@ -136,19 +136,22 @@ class bot:
     def log(self, ns, message, shown=True):
         ts = time.strftime('[%I:%M:%S%p]')
         try:   
-            ns = '['+ns+']'
+            if ns != 'System' and not ns.startswith('#'):
+                ts += ' [' + ns + '] '
+                ns = 'System'
+
             if shown:
                 # Added boolean "shown" for printing regular text in the console.
-                msg = ts+ns+message
+                msg = ts+' '+message
             else:
                 msg=message
         
-            self.UI.add_line(msg)
+            self.UI.add_line(ns, msg)
             
         except:
             
-            msg = ts+'[ERROR]'+self.conmsg['error'].format(traceback.format_exc())
-            self.UI.add_line(self.conmsg['error'].format(msg))
+            msg = ts+' [ERROR] '+self.conmsg['error'].format(traceback.format_exc())
+            self.UI.add_line('System', self.conmsg['error'].format(msg))
         
         if self.debug:
             self.debugfile.write(msg+'\n')
@@ -189,6 +192,9 @@ class bot:
     
     def say(self, ns, message):
         self.send('send {0}\n\nmsg main\n\n{1}'.format(self.format_ns(ns), message))
+
+    def act(self, ns, message):
+        self.send('send {0}\n\naction main\n\n{1}'.format(self.format_ns(ns), message))
     
     def part(self, ns):
         self.send('part {0}'.format(ns))
@@ -221,7 +227,7 @@ class bot:
     
             
     def mainloop(self):
-        ns = 'SYSTEM'
+        ns = 'System'
         self.log(ns, self.conmsg['start1'].format(self.m_name, self.m_version, self.m_author))
         self.log(ns, self.conmsg['start2'].format(str(self.debug)))
         self.log(ns, self.conmsg['start3'].format(self.username, self.auth))
@@ -471,6 +477,7 @@ class bot:
             self.buffer_ns = ns
             # see above for information on buffer_ns
             self.log('SERVER', self.conmsg['onjoin'].format(self.deform_ns(ns), r))
+            self.log(self.deform_ns(ns), '** Joined.')
             self.channel[ns] = {'topic': {}, 'title': {}, 'privclasses': {}, 'members': {}}
             data = {'ns': ns, 'r': r}
             
@@ -483,6 +490,7 @@ class bot:
             r = args[1]
             
             del self.channel[ns]
+            del self.UI.lines[self.deform_ns(ns)]
             if self.active_ns == ns:
                 self.change_ns()
                 
