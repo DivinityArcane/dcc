@@ -522,6 +522,7 @@ class bot:
             user = args[1]
             message = args[2]
             self.log(self.deform_ns(ns), self.conmsg['msgrecv'].format(user, self.parsehtml(message)))
+            self.ext.loopevents('msg', {'ns': ns, 'user': user, 'message': message})
         elif typ == 'actionrecv':
             ns = args[0]
             user = args[1]

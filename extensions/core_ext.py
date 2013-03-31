@@ -44,6 +44,7 @@ class extension(base):
         system.add_command('part', self.cmd_part, self.man['part'])
         system.add_command('clear', self.cmd_clear, self.man['clear'])
         system.add_command('exec', self.cmd_exec, self.man['exec'])
+        system.add_event('msg', self.on_msg)
         
     # Example...
     def cmd_test(self, ns, args, system):
@@ -99,7 +100,7 @@ class extension(base):
                 
     def cmd_clear(self, ns, args, system):
         # Not sure if theres a better way to do this but... :P
-        system.client.log('SYSTEM', ('\n'*100)+'Screen cleared.')
+        system.client.log(ns, ('\n'*100)+'Screen cleared.')
         
     def cmd_exec(self, ns, args, system):
         if len(args) > 1:
@@ -110,6 +111,8 @@ class extension(base):
                 system.client.log('ERROR', '\n\n{0}'.format(traceback.format_exc()))
         else: return False
                 
-                
+    def on_msg(self, data):
+        pass
+        
         
         

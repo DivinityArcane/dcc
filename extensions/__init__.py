@@ -16,7 +16,8 @@ class main:
         self.extensions = {}
         self.commands   = {}
         self.help       = {}
-        self.events     = {'conmsg': {},
+        self.events     = { 'conmsg': {},
+                            'msg': {},
                           }
 
     def loopevents(self, event, args):

@@ -138,7 +138,7 @@ class Interface:
             chanlist.sort()
             i = 4
             l = len(chanlist) - 1
-            screen.addstr(2, 1, '%s channel%s joined - to switch to a tab, type /tab channel' % (l + 1, 's' if l + 1 != 1 else ''))
+            screen.addstr(2, 1, '%s channel%s joined - to switch to a tab, type /chat channel' % (l + 1, 's' if l + 1 != 1 else ''))
 
             while l >= 0 and l < self.rows - 6:
                 screen.addstr(i, 1, chanlist[l])
