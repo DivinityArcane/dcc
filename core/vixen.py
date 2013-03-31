@@ -457,7 +457,8 @@ class bot:
             e=args[0]
             self.log('SERVER', self.conmsg['loggedin'].format(self.username, e))
             for each in self.autojoin:
-                self.join(self.format_ns(each))
+                if len(each) > 0:
+                    self.join(self.format_ns(each))
         elif typ == 'loginfail':
             e=args[0]
             self.authenticated = False
