@@ -11,6 +11,9 @@ from threading import Thread as thread
 class main:
     def __init__(self, client):
         self.client = client
+        self.deform_ns = client.deform_ns
+        self.format_ns = client.format_ns
+        self.username  = client.username
         
         self.trigger    = '/'
         self.extensions = {}
@@ -21,12 +24,16 @@ class main:
                           }
 
     def loopevents(self, event, args):
+        if self.client.debug:
+            self.client.log('DEBUG', 'Received event: {0}'.format(event))
         if event not in self.events:
             # We can add an event here, or we can simply let it go, in this case...
             return # lettin' it go :P
         for each in self.events[event]:
             try:
-                self.event[event][each](self, args)
+                if self.client.debug:
+                    self.client.log('DEBUG', "Processing event {0}".format(self.events[event][each]))
+                self.events[event][each](self, args)
             except:
                 self.onerror(traceback.format_exc())
                 # Above is used to handle errors in the extensions' system.
@@ -43,7 +50,7 @@ class main:
             args    = message.split(' ')
             command = args[0]
             if self.client.debug:
-                self.client.log('DEBUG', '\nCOMMAND:{0}\nARGS:{1}\nNS:{2}'.format(command, str(args), ns))
+                self.client.log(self.deform_ns(ns), '\nCOMMAND:{0}\nARGS:{1}\nNS:{2}'.format(command, str(args), ns))
             
             if command in self.commands:
                 try:
@@ -51,13 +58,13 @@ class main:
                     x = self.commands[command](ns, args, self)
                     if x == False:
                         if command in self.help.keys():
-                            self.client.log('', self.help[command].format(trig=self.trigger), False)
+                            self.client.log(self.deform_ns(ns), self.help[command].format(trig=self.trigger), False)
                         else:
-                            self.client.log('HELP', 'No help topic for {0}'.format(command), False)
+                            self.client.log(self.deform_ns(ns), 'No help topic for {0}'.format(command), False)
                 except:
                     self.onerror(traceback.format_exc())
             else:
-                self.client.log('', 'Command {0} doesn\'t exist'.format(command), False)
+                self.client.log(self.deform_ns(ns), 'Command {0} doesn\'t exist'.format(command), False)
         else:
             if len(message) < 1: return self.onerror('Nothing to send to {0}...'.format(self.client.deform_ns(ns)))
             

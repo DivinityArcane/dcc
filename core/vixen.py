@@ -405,6 +405,8 @@ class bot:
         else: return 'chat:'+data.strip('#')
         
     def deform_ns(self, data):
+        if data.lower() == 'system':
+            return 'System'
         if data.startswith('chat:'):
             return '#'+data.split(':')[1]
         elif data.startswith('#'):

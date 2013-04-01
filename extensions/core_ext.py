@@ -27,16 +27,19 @@ class extension(base):
                                 '       {trig}part\n'+
                                 '       {trig}part [ #channel ]\n\n'+
                                 '   [ #channel ] = channel to part\n**********',
-                      'exec':   '**********\nExec - execute python code.\n'+
+                      'exec':   '**********\nExec/Eval - execute or eval python code.\n'+
                                 '   Usage:\n'+
-                                '       {trig}exec [ code ]\n\n'+
+                                '       {trig}[exec, eval] [ code ]\n\n'+
                                 '   [ code ] = code to execute\n**********',
+                      'reload': '**********\nReload - Reload extensions.\n'+
+                                '   Usage:\n'+
+                                '       {trig}reload\n**********',
+                      'commands': '**********\nCommands - get the commands available.\n'+
+                                '   Usage:\n'+
+                                '       {trig}commands\n**********',
                                 }
 
         
-        
-        # This is an example comman, used for testing, not needed anymore.
-        #system.add_command('helloworld', self.cmd_test, 'Hello world command')
         
         system.add_command('chat', self.cmd_chat, self.man['chat'])
         system.add_command('me', self.cmd_me, self.man['me'])
@@ -44,14 +47,38 @@ class extension(base):
         system.add_command('part', self.cmd_part, self.man['part'])
         system.add_command('clear', self.cmd_clear, self.man['clear'])
         system.add_command('exec', self.cmd_exec, self.man['exec'])
+        system.add_command('eval', self.cmd_eval, self.man['exec'])
+        system.add_command('reload', self.cmd_reload, self.man['reload'])
+        system.add_command('commands', self.cmd_commands, self.man['commands'])
+        system.add_command('members', self.cmd_members, '')
         system.add_event('msg', self.on_msg)
         
-    # Example...
-    def cmd_test(self, ns, args, system):
-        system.client.log('TEST', 'Hello world!')
-
+    def cmd_members(self, ns, args, system):
+        results = []
+        listing = {}
+        if system.client.active_ns == 'system': return
+        for each in system.channel[ns]['members']:
+            listing[system.channel[ns]['members'][each]['pc']] = each
+        for each in listing:
+            
+            results.append("{0}:   ".format(each))
+            results.append("   {0}".format("\n".join(listing[each])))
+        system.client.log(system.deform_ns(ns), "\n".join(results))
+                
+    
+    def cmd_commands(self, ns, args, system):
+        system.client.log(system.deform_ns(ns), "***\nActive commands loaded...\n"+
+                                                "   {0}\n***".format(", ".join(list(system.commands.keys()))), False)
+    
+    def cmd_reload(self, ns, args, system):
+        if system.client.active_ns.lower() != 'system':
+            system.client.log(system.deform_ns(ns), "Reloading Extensions...", False)
+        system.reload_extensions()
+        if system.client.active_ns.lower() != 'system':
+            system.client.log(system.deform_ns(ns), "Reloaded Extensions!", False)
+        
     def cmd_chat(self, ns, args, system):
-        chatlist = [system.client.deform_ns(x).lower() for x in system.channel.keys()]
+        chatlist = [system.deform_ns(x).lower() for x in system.channel.keys()]
         if len(args) > 1:
             if args[1].lower() == 'system':
                 system.client.active_ns    = 'System'
@@ -59,7 +86,7 @@ class extension(base):
                 system.client.UI.refresh()
 
             else:                
-                channel = system.client.deform_ns(args[1].lower())
+                channel = system.deform_ns(args[1].lower())
 
                 if channel in chatlist:
                 # get index of lowered' list
@@ -69,7 +96,7 @@ class extension(base):
                     system.client.active_users = len(system.channel[realns]['members'].keys())
                     system.client.UI.refresh()
                 else:
-                    system.client.log('ERROR', 'Not joined in {0}'.format(system.client.deform_ns(channel)))
+                    system.client.log(system.deform_ns(ns), 'Not joined in {0}'.format(system.client.deform_ns(channel)))
 
         else:
             return False
@@ -94,13 +121,13 @@ class extension(base):
             system.client.part(channel)
         else:
             if system.client.active_ns == 'System':
-                return system.client.log('ERROR', 'Cannot part system namespace.')
+                return system.client.log('System', 'Cannot part system namespace.')
             else:
                 system.client.part(system.client.format_ns(system.client.active_ns))
                 
     def cmd_clear(self, ns, args, system):
         # Not sure if theres a better way to do this but... :P
-        system.client.log(ns, ('\n'*100)+'Screen cleared.')
+        system.client.log(system.deform_ns(ns), ('\n'*100)+'Screen cleared.')
         
     def cmd_exec(self, ns, args, system):
         if len(args) > 1:
@@ -108,11 +135,22 @@ class extension(base):
             try:
                 exec(cmd)
             except:
-                system.client.log('ERROR', '\n\n{0}'.format(traceback.format_exc()))
+                system.client.log(system.deform_ns(ns), '\n\n{0}'.format(traceback.format_exc()))
+        else: return False
+        
+    def cmd_eval(self, ns, args, system):
+        if len(args) > 1:
+            cmd = ' '.join(args[1:])
+            try:
+                system.client.log(system.deform_ns(ns), str(eval(cmd)))
+            except:
+                system.client.log(system.deform_ns(ns), '\n\n{0}'.format(traceback.format_exc()))
         else: return False
                 
-    def on_msg(self, data):
-        pass
+    def on_msg(self, system, data):
+        if system.username.lower() in data['message'].lower() and data['ns'].lower() != system.client.active_ns.lower():
+            system.client.log(system.deform_ns(system.client.active_ns), "NOTIFY: You were tabbed in {0} by {1}!".format(system.deform_ns(data['ns']),
+                data['user']), False)
         
         
         
