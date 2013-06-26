@@ -134,7 +134,7 @@ class bot:
         
         
     def log(self, ns, message, shown=True):
-        ts = time.strftime('[%I:%M:%S%p]')
+        ts = time.strftime('[%I:%M%p]')
         try:   
             if ns != 'System' and not ns.startswith('#'):
                 ts += ' [' + ns + '] '
@@ -142,9 +142,9 @@ class bot:
 
             if shown:
                 # Added boolean "shown" for printing regular text in the console.
-                msg = ts+' '+message
+                msg = ts+' '+str(message)
             else:
-                msg=message
+                msg=str(message)
         
             self.UI.add_line(ns, msg)
             
@@ -203,6 +203,12 @@ class bot:
     # End of server stuff.
     #
     
+    def human_list(self, sequence):
+        if len(sequence) == 0: return ''
+        sequence = [str(i) for i in sequence]
+        if len(sequence) == 2: return ' and '.join(sequence)
+        if len(sequence) > 2:  return ' and '.join([', '.join(sequence[:-1]), sequence[-1]])
+        return sequence[0]
     
     def send(self, data):
         try:
@@ -474,7 +480,7 @@ class bot:
             self.buffer_ns = ns
             # see above for information on buffer_ns
             self.log('SERVER', self.conmsg['onjoin'].format(self.deform_ns(ns), r))
-            self.log(self.deform_ns(ns), '** Joined.')
+            self.log(self.deform_ns(ns), '** Joined {0}'.format(self.deform_ns(ns)))
             self.channel[ns] = {'topic': {}, 'title': {}, 'privclasses': {}, 'members': {}}
             data = {'ns': ns, 'r': r}
             
@@ -632,7 +638,7 @@ class bot:
                     else:
                         _data[name] = {'pc': pc, 'usericon': usericon, 'symbol': symbol, 'realname': realname, 'gpc': gpc, 'con': 1}
                         self.log('SYSTEM', 'Registered {0}'.format(name))
-            _data['type'] = 'members'
+           
             self.channel[ns]['members'] = _data
             if ns == self.buffer_ns:
                 #again, see above for information about this

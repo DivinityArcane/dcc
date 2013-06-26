@@ -71,7 +71,7 @@ class main:
             self.client.say(ns, message)
 
     def onerror(self, error):
-        pass
+        self.client.log('System', error)
         # Again, we can do anything we want here. maybe display the error, save to debug file?
         # Etc... ~ OrrinFox
         
