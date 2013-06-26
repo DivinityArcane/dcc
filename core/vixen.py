@@ -335,6 +335,7 @@ class bot:
                     if '=' in each:
                         mk = each.find('=')
                         data[each[:mk]] = each[1+mk:]
+                
                 self.onevent('usrjoin', [ns, user, data])
             
             elif typ.startswith('part'):
@@ -528,7 +529,12 @@ class bot:
             ns = args[0]
             user = args[1]
             data = args[2]
-            self.channel[ns]['members'][user] = data
+            if user in self.channel[ns]['members']:
+                self.channel[ns]['members'][user]['con'] = self.channel[ns]['members'][user]['con'] + 1
+            else:
+                self.channel[ns]['members'][user] = data
+                self.channel[ns]['members'][user]['con'] = 1
+            
             if ns == self.active_ns:
                 # update information on active ns
                 self.active_users = len(self.channel[self.active_ns]['members'].keys())
@@ -539,7 +545,10 @@ class bot:
             reason  = args[2]
             data    = args[3]
             if user in self.channel[ns]['members'].keys():
-                del self.channel[ns]['members'][user]
+                if self.channel[ns]['members'][user]['con'] > 1:
+                    self.channel[ns]['members'][user]['con'] = self.channel[ns]['members'][user]['con'] - 1
+                else:
+                    del self.channel[ns]['members'][user]
             if ns == self.active_ns:
                 self.active_users = len(self.channel[self.active_ns]['members'].keys())
             if not reason:
@@ -552,7 +561,10 @@ class bot:
             reason  = args[3]
             by      = args[2]['by']
             if user in self.channel[ns]['members'].keys():
-                del self.channel[ns]['members'][user]
+                if self.channel[ns]['members'][user]['con'] > 1:
+                    self.channel[ns]['members'][user]['con'] = self.channel[ns]['members'][user]['con'] - 1
+                else:
+                    del self.channel[ns]['members'][user]
             if ns == self.active_ns:
                 self.active_users = len(self.channel[self.active_ns]['members'].keys())
             self.log(self.deform_ns(ns), self.conmsg['usrkicked'].format(user, by, '['+reason+']' if len(reason) > 0 else ''))
@@ -614,8 +626,14 @@ class bot:
                                                             'realname': realname,
                      #                                       'typename': typename,
                                                             'gpc': gpc}
-                    _data[name] = {'pc': pc, 'usericon': usericon, 'symbol': symbol, 'realname': realname, 'gpc': gpc}
+                    if name in _data:
+                        _data[name]['con'] = _data[name]['con'] + 1
+                        self.log('SYSTEM', 'Registered {0} again...'.format(name))
+                    else:
+                        _data[name] = {'pc': pc, 'usericon': usericon, 'symbol': symbol, 'realname': realname, 'gpc': gpc, 'con': 1}
+                        self.log('SYSTEM', 'Registered {0}'.format(name))
             _data['type'] = 'members'
+            self.channel[ns]['members'] = _data
             if ns == self.buffer_ns:
                 #again, see above for information about this
                 # theres a method to my madness. :P

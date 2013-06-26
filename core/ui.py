@@ -12,8 +12,8 @@ class Interface:
 
     def __init__(self):
         self.name     = 'dcc'
-        self.version  = '0.06 Beta'
-        self.title    = 'dAmn Curses Client - dcc v ' + self.version
+        self.version  = '1.0 Beta'
+        self.title    = ' dAmn Curses Client - dcc v ' + self.version + ' '
         self.actbar   = '-[ [un] in [ns] - [c] user[s] joined ]'
         self.joinedbar= '-[Channels: {0}'
         self.lines    = {}
