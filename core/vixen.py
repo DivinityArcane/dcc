@@ -43,7 +43,7 @@ class bot:
         self.pyver         = sys.version_info[0]    
         
         self.debug         = debug
-        if self.debug:
+        if self.debug == True:
             self.debugfile = open(debugfile, 'a+')
         
         
@@ -92,7 +92,7 @@ class bot:
             (re.compile("&link\t([^\t]+)\t([^\t]+)\t&\t"), "\\1 (\\2)"),
             (re.compile("&acro\t([^\t]+)\t"), "<acronym title=\"\\1\">"),
             (re.compile("&abbr\t([^\t]+)\t"), "<abbr title=\"\\1\">"),
-            (re.compile("&thumb\t([0-9]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t"), ":thumb\\1:"),
+            (re.compile("&thumb\t([0-9]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t"), ":thumb\\1:"),
             (re.compile("&img\t([^\t]+)\t([^\t]*)\t([^\t]*)\t"), "<img src=\"\\1\" alt=\"\\2\" title=\"\\3\" />"),
             (re.compile("&iframe\t([^\t]+)\t([0-9%]*)\t([0-9%]*)\t&\/iframe\t"), "<iframe src=\"\\1\" width=\"\\2\" height=\"\\3\" />"),
             (re.compile("<([^>]+) (width|height|title|alt)=\"\"([^>]*?)>"), "<\\1\\3>"),
@@ -251,8 +251,7 @@ class bot:
                     sys.stdout.write('\n')
                     time.sleep(.1)
                     self.quit('^C Keyboard interrupt.')
-            
-       
+
     def sendagent(self):
         self.log('SERVER', self.conmsg['sendagent'].format(self.client, self.clientver, self.agent))
         self.send('{0} {1}\nagent={2}'.format(self.client, self.clientver, self.agent))  
@@ -273,15 +272,10 @@ class bot:
             if t:
                 msg+=c
         return msg
-        
 
-    
-    
     def chkdata(self, data):
         data = self.parse(data)
         _data = self.formatdata(data)
-        
-        
         data    = _data['raw']
         command = _data['command']
         param   = _data['param']
@@ -612,13 +606,13 @@ class bot:
                     usericon    = x[2][x[2].find('=')+1:] 
                     symbol      = x[3][x[3].find('=')+1:]
                     realname    = x[4][x[4].find('=')+1:]
-                    typename    = x[5][x[5].find('=')+1:]
-                    gpc         = x[6][x[6].find('=')+1:]
+                    #typename    = x[5][x[5].find('=')+1:]
+                    gpc         = x[5][x[5].find('=')+1:]
                     self.channel[ns]['members'][name] = {   'pc': pc, 
                                                             'usericon': usericon,
                                                             'symbol': symbol,
                                                             'realname': realname,
-                                                            'typename': typename,
+                     #                                       'typename': typename,
                                                             'gpc': gpc}
                     _data[name] = {'pc': pc, 'usericon': usericon, 'symbol': symbol, 'realname': realname, 'gpc': gpc}
             _data['type'] = 'members'

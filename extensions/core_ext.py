@@ -38,9 +38,6 @@ class extension(base):
                                 '   Usage:\n'+
                                 '       {trig}commands\n**********',
                                 }
-
-        
-        
         system.add_command('chat', self.cmd_chat, self.man['chat'])
         system.add_command('me', self.cmd_me, self.man['me'])
         system.add_command('join', self.cmd_join, self.man['join'])
@@ -50,21 +47,7 @@ class extension(base):
         system.add_command('eval', self.cmd_eval, self.man['exec'])
         system.add_command('reload', self.cmd_reload, self.man['reload'])
         system.add_command('commands', self.cmd_commands, self.man['commands'])
-        system.add_command('members', self.cmd_members, '')
         system.add_event('msg', self.on_msg)
-        
-    def cmd_members(self, ns, args, system):
-        results = []
-        listing = {}
-        if system.client.active_ns == 'system': return
-        for each in system.channel[ns]['members']:
-            listing[system.channel[ns]['members'][each]['pc']] = each
-        for each in listing:
-            
-            results.append("{0}:   ".format(each))
-            results.append("   {0}".format("\n".join(listing[each])))
-        system.client.log(system.deform_ns(ns), "\n".join(results))
-                
     
     def cmd_commands(self, ns, args, system):
         system.client.log(system.deform_ns(ns), "***\nActive commands loaded...\n"+
