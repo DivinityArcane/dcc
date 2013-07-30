@@ -524,13 +524,17 @@ class bot:
             ns = args[0]
             user = args[1]
             message = args[2]
-            self.log(self.deform_ns(ns), self.conmsg['msgrecv'].format(user, self.parsehtml(message)))
-            self.ext.loopevents('msg', {'ns': ns, 'user': user, 'message': message})
+            try:
+                self.log(self.deform_ns(ns), self.conmsg['msgrecv'].format(user, self.parsehtml(message)))
+                self.ext.loopevents('msg', {'ns': ns, 'user': user, 'message': message})
+            except: pass
         elif typ == 'actionrecv':
             ns = args[0]
             user = args[1]
             message = args[2]
-            self.log(self.deform_ns(ns), self.conmsg['actionrecv'].format(user, self.parsehtml(message)))
+            try:
+                self.log(self.deform_ns(ns), self.conmsg['actionrecv'].format(user, self.parsehtml(message)))
+            except: pass
         elif typ == 'usrjoin':
             ns = args[0]
             user = args[1]
@@ -634,10 +638,10 @@ class bot:
                                                             'gpc': gpc}
                     if name in _data:
                         _data[name]['con'] = _data[name]['con'] + 1
-                        self.log('SYSTEM', 'Registered {0} again...'.format(name))
+                    
                     else:
                         _data[name] = {'pc': pc, 'usericon': usericon, 'symbol': symbol, 'realname': realname, 'gpc': gpc, 'con': 1}
-                        self.log('SYSTEM', 'Registered {0}'.format(name))
+                    
            
             self.channel[ns]['members'] = _data
             if ns == self.buffer_ns:
